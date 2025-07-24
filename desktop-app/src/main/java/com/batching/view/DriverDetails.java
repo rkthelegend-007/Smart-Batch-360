@@ -117,6 +117,7 @@ public class DriverDetails {
             HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.discarding())
                     .thenRun(() -> Platform.runLater(() -> {
                         showAlert("Deleted", "Driver deleted");
+                        clearForm();
                         loadDrivers();
                     }));
         });

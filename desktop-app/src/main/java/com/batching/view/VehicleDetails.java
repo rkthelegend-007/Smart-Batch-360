@@ -118,6 +118,7 @@ public class VehicleDetails {
             HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.discarding())
                     .thenRun(() -> Platform.runLater(() -> {
                         showAlert("Deleted", "Vehicle deleted");
+                        clearForm();
                         loadVehicles();
                     }));
         });

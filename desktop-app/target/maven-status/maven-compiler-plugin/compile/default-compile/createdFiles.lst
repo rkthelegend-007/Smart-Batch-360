@@ -13,14 +13,17 @@ com\batching\Main.class
 com\batching\view\VehicleDetails$1.class
 com\batching\view\ReportForm.class
 com\batching\view\VehicleDetails.class
+com\batching\model\HeaderData.class
 com\batching\model\RecipeData.class
 com\batching\view\CycleDataTable.class
 com\batching\view\CustomerDetails$1.class
 com\batching\util\PdfGenerator.class
+com\batching\view\HeaderDetails.class
 com\batching\view\DriverDetails$1.class
 com\batching\model\SiteData.class
 com\batching\view\layout\HeaderBar.class
 com\batching\model\VehicleData.class
+com\batching\view\HeaderDetails$1.class
 com\batching\view\CustomerDetails.class
 com\batching\view\CycleDataTable$1.class
 com\batching\view\DriverDetails.class

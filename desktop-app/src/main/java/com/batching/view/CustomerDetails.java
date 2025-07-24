@@ -133,6 +133,7 @@ public class CustomerDetails {
     HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.discarding())
             .thenRun(() -> Platform.runLater(() -> {
                 showAlert("Deleted", "Customer deleted");
+                clearForm();
                 loadCustomers();
             }));
 });

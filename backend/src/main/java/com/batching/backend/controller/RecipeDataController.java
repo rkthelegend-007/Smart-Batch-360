@@ -3,6 +3,7 @@ package com.batching.backend.controller;
 import com.batching.backend.entity.RecipeData;
 import com.batching.backend.repository.RecipeDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +22,12 @@ public class RecipeDataController {
     }
 
     @GetMapping("/{id}")
-    public RecipeData getRecipeById(@PathVariable int id) {
-        return recipeRepo.findById(id).orElse(null);
-    }
+    public ResponseEntity<RecipeData> getRecipe(@PathVariable int id) {
+    return recipeRepo.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
+
 
     @PostMapping
     public RecipeData saveRecipe(@RequestBody RecipeData recipe) {

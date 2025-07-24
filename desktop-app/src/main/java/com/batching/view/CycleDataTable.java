@@ -130,7 +130,8 @@ public class CycleDataTable {
         Tab createSiteContent = new Tab("Site Details", new SiteDetails().createSiteContent());
         Tab vehicleTab = new Tab("Vehicle Details", new VehicleDetails().createVehicleContent());
         Tab createDriverContent = new Tab("Driver Details", new DriverDetails().createDriverContent());
-        productionTabs.getTabs().addAll(recipeTab, customerDetailsTab,createSiteContent,vehicleTab,createDriverContent);
+        Tab createHeaderContent = new Tab("Header Details", new HeaderDetails().createHeaderContent());
+        productionTabs.getTabs().addAll(recipeTab, customerDetailsTab,createSiteContent,vehicleTab,createDriverContent,createHeaderContent);
 
         VBox wrapper = new VBox(productionTabs);
         wrapper.setPadding(new Insets(10));
@@ -140,286 +141,302 @@ public class CycleDataTable {
     // paste recipe tab content here 
 
     private final List<RecipeData> recipeList = new ArrayList<>();
-    private final ListView<String> savedRecipeList = new ListView<>();
+private final ListView<String> savedRecipeList = new ListView<>();
 
-    private final TextField recipeIdField = new TextField();
-    private final TextField recipeNameField = new TextField();
-    private final TextField recipeTotalField = new TextField();
-    private final TextField timestampField = new TextField();
+private final TextField recipeIdField = new TextField();
+private final TextField recipeNameField = new TextField();
+private final TextField recipeTotalField = new TextField();
+private final TextField timestampField = new TextField();
 
-    private final List<TextField> materialFields = new ArrayList<>();
-    private final List<TextField> setpointFields = new ArrayList<>();
+private final List<TextField> materialFields = new ArrayList<>();
+private final List<TextField> setpointFields = new ArrayList<>();
 
-    public Pane createRecipeContent() {
-        HBox rootLayout = new HBox(30);
-        rootLayout.setPadding(new Insets(30));
+public Pane createRecipeContent() {
+    HBox rootLayout = new HBox(30);
+    rootLayout.setPadding(new Insets(30));
 
-        VBox formContainer = new VBox(20);
-        formContainer.setPrefWidth(600);
+    VBox formContainer = new VBox(20);
+    formContainer.setPrefWidth(600);
 
-        Label title = new Label("🧪 Recipe Details");
-        title.getStyleClass().add("title-label");
+    Label title = new Label("🧪 Recipe Details");
+    title.getStyleClass().add("title-label");
 
-        GridPane topForm = new GridPane();
-         topForm.setHgap(20);
-         topForm.setVgap(10);
+    GridPane topForm = new GridPane();
+    topForm.setHgap(20);
+    topForm.setVgap(10);
 
-        recipeIdField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().matches("\\d{0,4}") ? c : null));
-        recipeNameField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().length() <= 30 ? c : null));
-        
-        recipeIdField.setPromptText("Enter ID (1-99)");
-        recipeNameField.setPromptText("Max 10 chars");
-        recipeTotalField.setPromptText("Auto Total");
-        timestampField.setPromptText("Auto Timestamp");
-        timestampField.setEditable(false);
+    recipeIdField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().matches("\\d{0,4}") ? c : null));
+    recipeNameField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().length() <= 20 ? c : null));
 
-         topForm.add(new Label("Recipe ID:"), 0, 0);     topForm.add(recipeIdField, 1, 0);
-         topForm.add(new Label("Recipe Name:"), 2, 0);   topForm.add(recipeNameField, 3, 0);
-         topForm.add(new Label("Total:"), 0, 1);         topForm.add(recipeTotalField, 1, 1);
-         topForm.add(new Label("Timestamp:"), 2, 1);     topForm.add(timestampField, 3, 1);
+    recipeIdField.setPromptText("Enter ID (1-99)");
+    recipeNameField.setPromptText("Max 20 chars");
+    recipeTotalField.setPromptText("Auto Total");
+    timestampField.setPromptText("Auto Timestamp");
+    timestampField.setEditable(false);
 
-        GridPane materialGrid = new GridPane();
-        materialGrid.setHgap(20);
-        materialGrid.setVgap(8);
+    topForm.add(new Label("Recipe ID:"), 0, 0);     topForm.add(recipeIdField, 1, 0);
+    topForm.add(new Label("Recipe Name:"), 2, 0);   topForm.add(recipeNameField, 3, 0);
+    topForm.add(new Label("Total:"), 0, 1);         topForm.add(recipeTotalField, 1, 1);
+    topForm.add(new Label("Timestamp:"), 2, 1);     topForm.add(timestampField, 3, 1);
 
-        for (int i = 0; i < 10; i++) {
-        TextField matField = new TextField("Mat " + (i + 1));
-        TextField setField = new TextField();
-        matField.setPromptText("Material " + (i + 1));
-        setField.setPromptText("Setpoint");
+    GridPane materialGrid = new GridPane();
+    materialGrid.setHgap(15);
+    materialGrid.setVgap(8);
 
-        materialFields.add(matField);
-        setpointFields.add(setField);
+    for (int i = 0; i < 20; i++) {
+        Label label = new Label((i + 1) + ".");
+        label.setMinWidth(25);
+        label.setStyle("-fx-alignment: CENTER_RIGHT;");
 
-        materialGrid.add(new Label((i + 1) + "."), 0, i);
-        materialGrid.add(matField, 1, i);
-        materialGrid.add(setField, 2, i);
+        TextField materialField = new TextField();
+        materialField.setPromptText("Material " + (i + 1));
+        materialField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().length() <= 10 ? c : null));
+
+        TextField setpointField = new TextField();
+        setpointField.setPromptText("Setpoint");
+        setpointField.setTextFormatter(new TextFormatter<>(c -> c.getControlNewText().matches("\\d{0,4}(\\.\\d{0,2})?") ? c : null));
+        setpointField.textProperty().addListener((obs, oldVal, newVal) -> calculateTotal());
+
+        materialFields.add(materialField);
+        setpointFields.add(setpointField);
+
+        if (i < 10) {
+            materialGrid.add(label, 0, i);
+            materialGrid.add(materialField, 1, i);
+            materialGrid.add(setpointField, 2, i);
+        } else {
+            materialGrid.add(label, 3, i - 10);
+            materialGrid.add(materialField, 4, i - 10);
+            materialGrid.add(setpointField, 5, i - 10);
+        }
+    }
+
+    Button saveBtn = new Button("💾 Save");
+    Button updateBtn = new Button("🔄 Update");
+    Button clearBtn = new Button("🧹 Clear");
+
+    HBox actions = new HBox(10, saveBtn, updateBtn, clearBtn);
+    actions.setPadding(new Insets(10, 0, 0, 0));
+
+    formContainer.getChildren().addAll(title, topForm, materialGrid, actions);
+
+    VBox savedBox = new VBox(10);
+    savedBox.setPrefWidth(300);
+    savedBox.setPadding(new Insets(10));
+    savedBox.setStyle("-fx-background-color: #f9f9f9; -fx-border-color: #ccc;");
+
+    TextField searchField = new TextField();
+    searchField.setPromptText("🔍 Search by name");
+
+    Button deleteBtn = new Button("🗑️ Delete");
+    deleteBtn.setMaxWidth(Double.MAX_VALUE);
+
+    savedBox.getChildren().addAll(
+            new Label("📋 Saved Recipes"),
+            searchField,
+            savedRecipeList,
+            deleteBtn
+    );
+
+    rootLayout.getChildren().addAll(formContainer, savedBox);
+
+    loadRecipes();
+
+    searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+        savedRecipeList.getItems().clear();
+        recipeList.stream()
+                .filter(r -> r.getRecipeName().toLowerCase().contains(newVal.toLowerCase()))
+                .forEach(r -> savedRecipeList.getItems().add(r.getRecipeId() + " - " + r.getRecipeName()));
+    });
+
+    saveBtn.setOnAction(e -> {
+        int id = getRecipeId();
+        if (id == -1 || recipeNameField.getText().isEmpty()) {
+            showAlert("Validation", "Please enter a valid Recipe ID and Name.");
+            return;
         }
 
-        for (int i = 10; i < 20; i++) {
-        TextField matField = new TextField("Mat " + (i + 1));
-        TextField setField = new TextField();
-        matField.setPromptText("Material " + (i + 1));
-        setField.setPromptText("Setpoint");
+        HttpRequest checkReq = HttpRequest.newBuilder()
+        .uri(URI.create("http://localhost:8080/api/recipes/" + id))
+        .build();
 
-        materialFields.add(matField);
-        setpointFields.add(setField);
-
-        materialGrid.add(new Label((i + 1) + "."), 3, i - 10);
-        materialGrid.add(matField, 4, i - 10);
-        materialGrid.add(setField, 5, i - 10);
-        }
-
-        Button saveBtn = new Button("💾 Save");
-        Button updateBtn = new Button("🔄 Update");
-        Button clearBtn = new Button("🧹 Clear");
-
-        HBox actions = new HBox(10, saveBtn, updateBtn, clearBtn);
-        actions.setPadding(new Insets(20, 0, 0, 0));
-
-        formContainer.getChildren().addAll(title, topForm, materialGrid, actions);
-
-        VBox savedBox = new VBox(10);
-        savedBox.setPrefWidth(300);
-        savedBox.setPadding(new Insets(10));
-        savedBox.setStyle("-fx-background-color: #f9f9f9; -fx-border-color: #ccc;");
-
-        TextField searchField = new TextField();
-        searchField.setPromptText("🔍 Search by name");
-
-        Button deleteBtn = new Button("🗑️ Delete");
-        deleteBtn.setMaxWidth(Double.MAX_VALUE);
-
-        savedBox.getChildren().addAll(
-                new Label("📋 Saved Recipes"),
-                searchField,
-                savedRecipeList,
-                deleteBtn
-        );
-
-        rootLayout.getChildren().addAll(formContainer, savedBox);
-
-        loadRecipes();
-
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            savedRecipeList.getItems().clear();
-            recipeList.stream()
-                    .filter(r -> r.getRecipeName().toLowerCase().contains(newVal.toLowerCase()))
-                    .forEach(r -> savedRecipeList.getItems().add(r.getRecipeId() + " - " + r.getRecipeName()));
-        });
-
-        saveBtn.setOnAction(e -> {
-            int id = getRecipeId();
-            if (id == -1 || recipeNameField.getText().isEmpty()) {
-                showAlert("Validation", "Please enter a valid Recipe ID and Name.");
-                return;
+        HttpClient.newHttpClient().sendAsync(checkReq, HttpResponse.BodyHandlers.ofString())
+        .thenApply(response -> {
+            int status = response.statusCode();
+            return status == 200; 
+        })
+        .thenAccept(exists -> Platform.runLater(() -> {
+            if (exists) {
+                showAlert("Duplicate", "Recipe ID already exists.");
+            } else {
+                saveRecipe(id, false);
             }
+        }));
 
-            HttpRequest checkReq = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/recipes/" + id))
-                    .build();
+    });
 
-            HttpClient.newHttpClient().sendAsync(checkReq, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenAccept(body -> Platform.runLater(() -> {
-                        if (body != null && !body.equals("null")) {
-                            showAlert("Duplicate", "Recipe ID already exists.");
-                        } else {
-                            saveRecipe(id, false);
-                        }
-                    }));
-        });
+    updateBtn.setOnAction(e -> {
+        int id = getRecipeId();
+        if (id == -1) return;
+        saveRecipe(id, true);
+    });
 
-        updateBtn.setOnAction(e -> {
-            int id = getRecipeId();
-            if (id == -1) return;
-            saveRecipe(id, true);
-        });
+    deleteBtn.setOnAction(e -> {
+        String selected = savedRecipeList.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+        int id = Integer.parseInt(selected.split("-")[0].trim());
 
-        deleteBtn.setOnAction(e -> {
-            String selected = savedRecipeList.getSelectionModel().getSelectedItem();
-            if (selected == null) return;
-            int id = Integer.parseInt(selected.split("-")[0].trim());
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/recipes/" + id))
-                    .DELETE()
-                    .build();
-
-            HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.discarding())
-                    .thenRun(() -> Platform.runLater(() -> {
-                        showAlert("Deleted", "Recipe deleted.");
-                        loadRecipes();
-                    }));
-        });
-
-        clearBtn.setOnAction(e -> clearForm());
-
-        savedRecipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && newVal.contains("-")) {
-                int id = Integer.parseInt(newVal.split("-")[0].trim());
-                recipeList.stream()
-                        .filter(r -> r.getRecipeId() == id)
-                        .findFirst()
-                        .ifPresent(this::populateForm);
-            }
-        });
-
-        return rootLayout;
-    }
-
-    private int getRecipeId() {
-        try {
-            return Integer.parseInt(recipeIdField.getText());
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-
-    private void populateForm(RecipeData r) {
-        recipeIdField.setText(String.valueOf(r.getRecipeId()));
-        recipeNameField.setText(r.getRecipeName());
-        recipeTotalField.setText(r.getRecipeTotal());
-        timestampField.setText(r.getTimestamp());
-
-        for (int i = 0; i < 20; i++) {
-            materialFields.get(i).setText(getField(r, "getMaterial" + (i + 1)));
-            setpointFields.get(i).setText(getField(r, "getSetpoint" + (i + 1)));
-        }
-    }
-
-    private String getField(RecipeData r, String methodName) {
-        try {
-            return (String) RecipeData.class.getMethod(methodName).invoke(r);
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private void clearForm() {
-        recipeIdField.clear(); recipeNameField.clear(); recipeTotalField.clear(); timestampField.clear();
-        materialFields.forEach(TextField::clear);
-        setpointFields.forEach(TextField::clear);
-    }
-
-    private void saveRecipe(int id, boolean isUpdate) {
-        RecipeData r = new RecipeData();
-        r.setRecipeId(id);
-        r.setRecipeName(recipeNameField.getText());
-        r.setRecipeTotal(recipeTotalField.getText());
-
-        String timestamp = (isUpdate ? "U-" : "S-") +
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH_mm_ss"));
-        r.setTimestamp(timestamp);
-        timestampField.setText(timestamp);
-
-        for (int i = 0; i < 20; i++) {
-            setField(r, "setMaterial" + (i + 1), materialFields.get(i).getText());
-            setField(r, "setSetpoint" + (i + 1), setpointFields.get(i).getText());
-        }
-
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(r);
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/recipes" + (isUpdate ? "/" + id : "")))
-                    .header("Content-Type", "application/json")
-                    .method(isUpdate ? "PUT" : "POST", HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                    .thenAccept(resp -> Platform.runLater(() -> {
-                        showAlert("Success", isUpdate ? "Updated!" : "Saved!");
-                        clearForm();
-                        loadRecipes();
-                    }));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setField(RecipeData r, String methodName, String value) {
-        try {
-            RecipeData.class.getMethod(methodName, String.class).invoke(r, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadRecipes() {
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/recipes"))
+                .uri(URI.create("http://localhost:8080/api/recipes/" + id))
+                .DELETE()
+                .build();
+
+        HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.discarding())
+                .thenRun(() -> Platform.runLater(() -> {
+                    showAlert("Deleted", "Recipe deleted.");
+                    clearForm();
+                    loadRecipes();
+                }));
+    });
+
+    clearBtn.setOnAction(e -> clearForm());
+
+    savedRecipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+        if (newVal != null && newVal.contains("-")) {
+            int id = Integer.parseInt(newVal.split("-")[0].trim());
+            recipeList.stream()
+                    .filter(r -> r.getRecipeId() == id)
+                    .findFirst()
+                    .ifPresent(this::populateForm);
+        }
+    });
+
+    return rootLayout;
+}
+
+private int getRecipeId() {
+    try {
+        return Integer.parseInt(recipeIdField.getText());
+    } catch (NumberFormatException e) {
+        return -1;
+    }
+}
+
+private void populateForm(RecipeData r) {
+    recipeIdField.setText(String.valueOf(r.getRecipeId()));
+    recipeNameField.setText(r.getRecipeName());
+    recipeTotalField.setText(r.getRecipeTotal());
+    timestampField.setText(r.getTimestamp());
+
+    for (int i = 0; i < 20; i++) {
+        materialFields.get(i).setText(getField(r, "getMaterial" + (i + 1)));
+        setpointFields.get(i).setText(getField(r, "getSetpoint" + (i + 1)));
+    }
+}
+
+private String getField(RecipeData r, String methodName) {
+    try {
+        return (String) RecipeData.class.getMethod(methodName).invoke(r);
+    } catch (Exception e) {
+        return "";
+    }
+}
+
+private void clearForm() {
+    recipeIdField.clear(); recipeNameField.clear(); recipeTotalField.clear(); timestampField.clear();
+    materialFields.forEach(TextField::clear);
+    setpointFields.forEach(TextField::clear);
+}
+
+private void saveRecipe(int id, boolean isUpdate) {
+    RecipeData r = new RecipeData();
+    r.setRecipeId(id);
+    r.setRecipeName(recipeNameField.getText());
+    r.setRecipeTotal(recipeTotalField.getText());
+
+    String timestamp = (isUpdate ? "U-" : "S-") +
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH_mm_ss"));
+    r.setTimestamp(timestamp);
+    timestampField.setText(timestamp);
+
+    for (int i = 0; i < 20; i++) {
+        setField(r, "setMaterial" + (i + 1), materialFields.get(i).getText());
+        setField(r, "setSetpoint" + (i + 1), setpointFields.get(i).getText());
+    }
+
+    try {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(r);
+
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/recipes" + (isUpdate ? "/" + id : "")))
+                .header("Content-Type", "application/json")
+                .method(isUpdate ? "PUT" : "POST", HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
         HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenAccept(json -> {
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        List<RecipeData> loaded = mapper.readValue(json, new TypeReference<>() {});
-                        recipeList.clear();
-                        recipeList.addAll(loaded);
-
-                        Platform.runLater(() -> {
-                            savedRecipeList.getItems().clear();
-                            loaded.forEach(r -> savedRecipeList.getItems().add(r.getRecipeId() + " - " + r.getRecipeName()));
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+                .thenAccept(resp -> Platform.runLater(() -> {
+                    showAlert("Success", isUpdate ? "Updated!" : "Saved!");
+                    clearForm();
+                    loadRecipes();
+                }));
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
-    private void showAlert(String title, String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setContentText(msg);
-        alert.showAndWait();
+private void setField(RecipeData r, String methodName, String value) {
+    try {
+        RecipeData.class.getMethod(methodName, String.class).invoke(r, value);
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
+private void loadRecipes() {
+    HttpRequest req = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:8080/api/recipes"))
+            .build();
+
+    HttpClient.newHttpClient().sendAsync(req, HttpResponse.BodyHandlers.ofString())
+            .thenApply(HttpResponse::body)
+            .thenAccept(json -> {
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<RecipeData> loaded = mapper.readValue(json, new TypeReference<>() {});
+                    recipeList.clear();
+                    recipeList.addAll(loaded);
+
+                    Platform.runLater(() -> {
+                        savedRecipeList.getItems().clear();
+                        loaded.forEach(r -> savedRecipeList.getItems().add(r.getRecipeId() + " - " + r.getRecipeName()));
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+}
+
+private void showAlert(String title, String msg) {
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle(title);
+    alert.setContentText(msg);
+    alert.showAndWait();
+}
+
+private void calculateTotal() {
+    double total = 0;
+    for (TextField sp : setpointFields) {
+        try {
+            total += Double.parseDouble(sp.getText());
+        } catch (NumberFormatException ignored) {
+        }
+    }
+    recipeTotalField.setText(String.format("%.2f", total));
+}
+
 
     //end of recipe tab content 
-
     private void loadDataByBatch(String batchNumber) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
