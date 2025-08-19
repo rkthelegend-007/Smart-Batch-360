@@ -8,38 +8,27 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-
 import com.batching.model.CycleData;
 import com.batching.model.RecipeData;
-//import com.batching.model.RecipeData;
-import com.batching.view.export.ExportAsPdf;
-import com.batching.view.layout.HeaderBar;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -49,79 +38,8 @@ public class CycleDataTable {
     private TableView<CycleData> table;
     final BooleanProperty isDuplicate = new SimpleBooleanProperty(false);
 
-    public void showTable(Stage stage) {
-        Label title = new Label("SmartBatch 360");
-        title.getStyleClass().add("title-label");
-
-        // 🔷 TabPane for Batching / Production / Consumption views
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Tabs
-        Tab batchingTab = new Tab("Batching", createBatchingContent(stage));
-        Tab productionTab = new Tab("Production", createProductionContent());
-        Tab consumptionTab = new Tab("Consumption", new Label("📊 Consumption data view coming soon..."));
-
-        tabPane.getTabs().addAll(batchingTab, productionTab, consumptionTab);
-
-        VBox root = new VBox(15, title, tabPane);
-        root.setPadding(new Insets(20));
-
-        Scene scene = new Scene(root, 1280, 700);
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-
-        stage.setTitle("SmartBatch 360");
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    private Pane createBatchingContent(Stage stage) {
-        table = new TableView<>();
-
-        // Define all columns
-        TableColumn<CycleData, Integer> srNoCol = new TableColumn<>("Sr No");
-        srNoCol.setCellValueFactory(new PropertyValueFactory<>("srNo"));
-        table.getColumns().add(srNoCol);
-
-        TableColumn<CycleData, String> batchCol = new TableColumn<>("Batch Number");
-        batchCol.setCellValueFactory(new PropertyValueFactory<>("batchNumber"));
-        table.getColumns().add(batchCol);
-
-        for (int i = 1; i <= 20; i++) {
-            TableColumn<CycleData, String> col = new TableColumn<>("Material " + i);
-            col.setCellValueFactory(new PropertyValueFactory<>("material" + i));
-            table.getColumns().add(col);
-        }
-
-        // Left header panel
-        HeaderBar headerBar = new HeaderBar();
-        headerBar.setPrefWidth(350);
-        headerBar.setMinWidth(350);
-        headerBar.setStyle("-fx-background-color: #f4f4f4; -fx-padding: 15; -fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;");
-
-        headerBar.setOnViewClicked((fromBatch, toBatch) -> {
-            if (fromBatch == null || fromBatch.isEmpty()) {
-                showAlert("Validation", "Please select a valid 'From Batch' number.");
-                return;
-            }
-            loadDataByBatch(fromBatch); // Future: handle toBatch too
-        });
-
-        headerBar.setOnPrintClicked(() -> {
-            if (dataList == null || dataList.isEmpty()) {
-                showAlert("No Data", "Please load a report before exporting.");
-                return;
-            }
-            ExportAsPdf.showPreviewAndExport(dataList, stage);
-        });
-
-        HBox layout = new HBox(headerBar, table);
-        HBox.setHgrow(table, Priority.ALWAYS); // Let table expand
-
-        return layout;
-    }
-
-    private Pane createProductionContent() {
+    
+    public Pane createProductionContent() {
         TabPane productionTabs = new TabPane();
         productionTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
@@ -130,7 +48,7 @@ public class CycleDataTable {
         Tab createSiteContent = new Tab("Site Details", new SiteDetails().createSiteContent());
         Tab vehicleTab = new Tab("Vehicle Details", new VehicleDetails().createVehicleContent());
         Tab createDriverContent = new Tab("Driver Details", new DriverDetails().createDriverContent());
-        Tab createHeaderContent = new Tab("Header Details", new HeaderDetails().createHeaderContent());
+        Tab createHeaderContent = new Tab("Company Details", new HeaderDetails().createHeaderContent());
         productionTabs.getTabs().addAll(recipeTab, customerDetailsTab,createSiteContent,vehicleTab,createDriverContent,createHeaderContent);
 
         VBox wrapper = new VBox(productionTabs);
@@ -141,7 +59,7 @@ public class CycleDataTable {
     // paste recipe tab content here 
 
     private final List<RecipeData> recipeList = new ArrayList<>();
-private final ListView<String> savedRecipeList = new ListView<>();
+    private final ListView<String> savedRecipeList = new ListView<>();
 
 private final TextField recipeIdField = new TextField();
 private final TextField recipeNameField = new TextField();
@@ -171,6 +89,7 @@ public Pane createRecipeContent() {
     recipeIdField.setPromptText("Enter ID (1-99)");
     recipeNameField.setPromptText("Max 20 chars");
     recipeTotalField.setPromptText("Auto Total");
+    recipeTotalField.setEditable(false);
     timestampField.setPromptText("Auto Timestamp");
     timestampField.setEditable(false);
 
@@ -437,28 +356,6 @@ private void calculateTotal() {
 
 
     //end of recipe tab content 
-    private void loadDataByBatch(String batchNumber) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/cycle/by-batch/" + batchNumber))
-                    .build();
-
-            HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenAccept(json -> {
-                        try {
-                            ObjectMapper mapper = new ObjectMapper();
-                            dataList = mapper.readValue(json, new TypeReference<>() {});
-                            Platform.runLater(() -> table.getItems().setAll(dataList));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     // Moved Recipe UI to its own class (RecipeView) for separation
     public static class MaterialRow {
         private final SimpleStringProperty materialName;

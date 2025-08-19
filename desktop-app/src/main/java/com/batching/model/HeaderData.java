@@ -1,8 +1,11 @@
 package com.batching.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HeaderData {
 
     private final SimpleIntegerProperty headerId = new SimpleIntegerProperty();
@@ -13,12 +16,13 @@ public class HeaderData {
     private final SimpleStringProperty pinCode = new SimpleStringProperty();
     private final SimpleStringProperty logoPath = new SimpleStringProperty();
 
-    // Getters and Setters
-
+    // === Jackson needs this to map 'id' field from backend ===
+    @JsonProperty("id")
     public int getHeaderId() {
         return headerId.get();
     }
 
+    @JsonProperty("id")
     public void setHeaderId(int id) {
         this.headerId.set(id);
     }
