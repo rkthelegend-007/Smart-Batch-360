@@ -1,68 +1,72 @@
-/* Root styling */
+/* Root background */
 .root {
-    -fx-background-color: linear-gradient(to bottom right, #ffffff, #f8f6f4);
+    -fx-background-color: linear-gradient(to bottom right, #fdfdfd, #f2f2f2);
     -fx-font-family: 'Segoe UI', sans-serif;
 }
 
-/* Labels */
-.label {
-    -fx-font-size: 80px;
-    -fx-text-fill: #333333;
+/* Title */
+.login-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d2d2d;
+    -fx-padding: 0 0 10 0;
 }
 
-/* TextFields and PasswordFields */
+/* Input fields */
 .text-field,
 .password-field {
     -fx-background-color: #ffffff;
-    -fx-border-color: #cccccc;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-padding: 6 10 6 10;
-    -fx-font-size: 14px;
+    -fx-border-color: #bfbfbf;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6 10;
+    -fx-font-size: 13px;
 }
 
 .text-field:focused,
 .password-field:focused {
-    -fx-border-color: #4d90fe;
-    -fx-effect: dropshadow(gaussian, #4d90fe, 3, 0.5, 0, 0);
+    -fx-border-color: #4a90e2;
+    -fx-effect: dropshadow(gaussian, #4a90e2, 4, 0.4, 0, 0);
 }
 
 /* Login Button */
 .button {
-    -fx-background-color: #4d90fe;
+    -fx-background-color: #4a90e2;
     -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8 20;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
+    -fx-font-size: 13px;
+    -fx-padding: 6 20;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(77, 144, 254, 0.3), 5, 0.3, 0, 2);
 }
 
 .button:hover {
-    -fx-background-color: #3c7dc9;
+    -fx-background-color: #3b7cc1;
 }
 
 .button:pressed {
-    -fx-background-color: #3367b0;
+    -fx-background-color: #2f64a3;
 }
 
 /* Error message */
 .error-label {
-    -fx-text-fill: #d9534f;
+    -fx-text-fill: #c62828;
     -fx-font-size: 12px;
-    -fx-padding: 5 0 0 0;
+    -fx-padding: 4 0 0 0;
 }
 
-/* Animated container */
-.animated-container {
+/* Login card (glass style) */
+.glass-card {
     -fx-background-color: white;
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
     -fx-padding: 25;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0.1, 0, 2);
-    -fx-max-width: 500;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0.2, 0, 4);
     -fx-alignment: center;
-}
 
+    /* 🔽 force smaller size */
+    -fx-max-width: 320;
+    -fx-min-width: 280;
+    -fx-max-height: 300;
+}
 

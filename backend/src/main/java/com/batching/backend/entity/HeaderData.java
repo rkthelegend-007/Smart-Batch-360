@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 public class HeaderData {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String companyName;

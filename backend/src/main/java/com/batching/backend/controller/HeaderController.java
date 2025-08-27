@@ -23,9 +23,9 @@ public class HeaderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<HeaderData> getById(@PathVariable int id) {
-        return headerRepo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.ok(null)); // Not 404, so frontend gets "null"
+    return headerRepo.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
